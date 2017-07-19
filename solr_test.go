@@ -59,7 +59,7 @@ var _ = Describe("Solr Client", func() {
 
 		It("can find a replica", func() {
 			state, err := solrClient.GetClusterState()
-			Expect(err).To(BeNil())
+			Expect(err).To(Not(BeNil()))
 			Expect(state).To(Not(BeNil()))
 			Expect(len(state.Collections)).To(Equal(1))
 			replicas, err := locator.GetReplicasFromRoute("mycrazyshardkey1!")
