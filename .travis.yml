@@ -25,6 +25,7 @@ after_script:
 notifications:
   email:
     recipients:
-      - shawn.feldman+go-solr@gmail.com
+      - team-mcon-engineers+gosolr@sendgrid.com
+      - team-mcrwc-engineers+gosolr@sendgrid.com
     on_success: never # default: change
     on_failure: always # default: always
