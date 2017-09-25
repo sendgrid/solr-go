@@ -32,7 +32,7 @@ func findShard(key string, cs *Collection) (*Shard, error) {
 	if err != nil {
 		return nil, err
 	}
-	shardKeyHash, err := Hash(composite)
+	shardKeyHash := Hash(composite)
 	for name, shard := range cs.Shards {
 		if isShardActive(&shard) {
 			hashRange, err := ConvertToHashRange(shard.Range)
@@ -53,7 +53,7 @@ func findReplicas(key string, cs *Collection) (map[string]Replica, error) {
 	if err != nil {
 		return nil, err
 	}
-	shardKeyHash, err := Hash(composite)
+	shardKeyHash := Hash(composite)
 	replicas := make(map[string]Replica)
 	for _, shard := range cs.Shards {
 		if isShardActive(&shard) {

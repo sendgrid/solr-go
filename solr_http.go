@@ -275,7 +275,7 @@ func Cursor(c string) func(url.Values) {
 
 func UrlVals(urlVals url.Values) func(url.Values) {
 	return func(p url.Values) {
-		for key, _ := range urlVals {
+		for key := range urlVals {
 			p[key] = urlVals[key]
 		}
 	}

@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func Hash(key CompositeKey) (int32, error) {
+func Hash(key CompositeKey) int32 {
 	mask := 32 - 16 - key.Bits
 	if key.DocID != "" {
 		hashes := []int32{
@@ -14,10 +14,10 @@ func Hash(key CompositeKey) (int32, error) {
 			int32(murmur3.Sum32([]byte(key.DocID))),
 		}
 		masks := []int32{
-			(-1 << mask), // -10000000000000000
-			65535,        // 1111111111111111
+			-1 << mask, // -10000000000000000
+			65535,      // 1111111111111111
 		}
-		return (hashes[0] & masks[0]) | (hashes[1] & masks[1]), nil
+		return (hashes[0] & masks[0]) | (hashes[1] & masks[1])
 	}
 	hashes := []int32{
 		int32(murmur3.Sum32([]byte(key.ShardKey))),
@@ -25,10 +25,10 @@ func Hash(key CompositeKey) (int32, error) {
 	}
 
 	masks := []int32{
-		(-1 << mask), // -10000000000000000
-		65535,        // 1111111111111111
+		-1 << mask, // -10000000000000000
+		65535,      // 1111111111111111
 	}
-	return (hashes[0] & masks[0]) | (hashes[1] & masks[1]), nil
+	return (hashes[0] & masks[0]) | (hashes[1] & masks[1])
 }
 
 func ConvertToHashRange(hashRange string) (HashRange, error) {

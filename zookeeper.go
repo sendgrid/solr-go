@@ -66,7 +66,7 @@ func (z *zookeeper) Get(node string) ([]byte, int, error) {
 	if err != nil {
 		return nil, 0, err
 	}
-	val := bytes[:len(bytes)]
+	val := bytes[:]
 	return val, int(stat.Version), nil
 }
 
