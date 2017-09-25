@@ -15,11 +15,11 @@ func (err SolrError) Error() string {
 }
 
 func NewSolrError(status int, message string) error {
-	return SolrError{errorMessage: fmt.Sprintf("recieved error response from solr status: %d message: %s", status, message)}
+	return SolrError{errorMessage: fmt.Sprintf("received error response from solr status: %d message: %s", status, message)}
 }
 
 func NewSolrRFError(rf, minRF int) error {
-	return SolrMinRFError{SolrError{errorMessage: fmt.Sprintf("recieved error response from solr: rf (%d) is < min_rf (%d)", rf, minRF)}, rf}
+	return SolrMinRFError{SolrError{errorMessage: fmt.Sprintf("received error response from solr: rf (%d) is < min_rf (%d)", rf, minRF)}, rf}
 }
 
 type SolrMinRFError struct {
@@ -32,7 +32,7 @@ type SolrInternalError struct {
 }
 
 func NewSolrInternalError(status int, message string) error {
-	return SolrInternalError{SolrError{errorMessage: fmt.Sprintf("recieved error response from solr status: %d message: %s", status, message)}}
+	return SolrInternalError{SolrError{errorMessage: fmt.Sprintf("received error response from solr status: %d message: %s", status, message)}}
 }
 
 type SolrLeaderError struct {
@@ -56,7 +56,7 @@ type SolrParseError struct {
 }
 
 func NewSolrParseError(status int, message string) error {
-	return SolrInternalError{SolrError{errorMessage: fmt.Sprintf("recieved error response from solr status: %d message: %s", status, message)}}
+	return SolrInternalError{SolrError{errorMessage: fmt.Sprintf("received error response from solr status: %d message: %s", status, message)}}
 }
 
 type SolrMapParseError struct {

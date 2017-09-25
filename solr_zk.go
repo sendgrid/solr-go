@@ -103,7 +103,7 @@ func (s *solrZkInstance) GetLeadersAndReplicas(docID string) ([]string, error) {
 		}
 	}
 	if leaderCount == 0 {
-		s.logger.Debug(fmt.Sprintf("Could not find any leaders for docid % ", docID))
+		s.logger.Debug(fmt.Sprintf("Could not find any leaders for docid %s ", docID))
 	}
 	return all, err
 }
