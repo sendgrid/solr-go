@@ -3,11 +3,12 @@ package main
 import (
 	"crypto/rand"
 	"fmt"
-	. "github.com/sendgrid/go-solr"
 	"io"
 	"os"
 	"strconv"
 	"time"
+
+	. "github.com/sendgrid/go-solr"
 )
 
 var (
@@ -45,6 +46,9 @@ func main() {
 		limit, err = strconv.Atoi(os.Args[0])
 		if err != nil {
 			limit, err = strconv.Atoi(os.Args[1])
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 	numFound, err := run(limit, "/3")

@@ -326,6 +326,7 @@ var _ = Describe("Solr Client", func() {
 			err = solrNoAuthClient.Listen()
 			Expect(err).To(BeNil())
 			replicas, err := locator.GetReplicaUris()
+			Expect(err).To(BeNil())
 			r, err := solrNoAuthHttp.Select(replicas, solr.FilterQuery("*:*"), solr.Rows(10))
 			Expect(err).To(Not(BeNil()))
 			Expect(strings.Contains(err.Error(), "401")).To(BeTrue())
