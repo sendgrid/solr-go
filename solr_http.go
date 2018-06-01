@@ -30,6 +30,7 @@ type solrHttp struct {
 	insecureSkipVerify  bool
 	writeTimeoutSeconds int
 	readTimeoutSeconds  int
+	router              Router
 }
 
 func NewSolrHTTP(useHTTPS bool, collection string, options ...func(*solrHttp)) (SolrHTTP, error) {
@@ -55,6 +56,10 @@ func NewSolrHTTP(useHTTPS bool, collection string, options ...func(*solrHttp)) (
 		}
 	}
 
+	if solrCli.router == nil {
+		solrCli.router = NewRoundRobinRouter()
+	}
+
 	return &solrCli, nil
 }
 
@@ -62,6 +67,7 @@ func (s *solrHttp) Update(nodeUris []string, singleDoc bool, doc interface{}, op
 	if len(nodeUris) == 0 {
 		return fmt.Errorf("[SolrHTTP] nodeuris: empty node uris is not valid")
 	}
+	nodeUri := s.router.GetUriFromList(nodeUris)
 	urlVals := url.Values{
 		"min_rf": {fmt.Sprintf("%d", s.minRf)},
 	}
@@ -70,7 +76,7 @@ func (s *solrHttp) Update(nodeUris []string, singleDoc bool, doc interface{}, op
 		opt(urlVals)
 	}
 
-	uri := fmt.Sprintf("%s/%s/update", nodeUris[0], s.collection)
+	uri := fmt.Sprintf("%s/%s/update", nodeUri, s.collection)
 	if singleDoc {
 		uri += "/json/docs"
 	}
@@ -94,7 +100,11 @@ func (s *solrHttp) Update(nodeUris []string, singleDoc bool, doc interface{}, op
 		req.Header.Add("Authorization", fmt.Sprintf("Basic %s", basicCred))
 	}
 
+	start := time.Now()
 	resp, err := s.writeClient.Do(req)
+	if s.router != nil {
+		s.router.AddSearchResult(time.Since(start), nodeUri, resp, err)
+	}
 	if err != nil {
 		return err
 	}
@@ -134,6 +144,8 @@ func (s *solrHttp) Select(nodeUris []string, opts ...func(url.Values)) (SolrResp
 	if len(nodeUris) == 0 {
 		return SolrResponse{}, fmt.Errorf("[SolrHTTP] nodeuris: empty node uris is not valid")
 	}
+	nodeUri := s.router.GetUriFromList(nodeUris)
+
 	var err error
 	urlValues := url.Values{
 		"wt": {"json"},
@@ -142,7 +154,7 @@ func (s *solrHttp) Select(nodeUris []string, opts ...func(url.Values)) (SolrResp
 		opt(urlValues)
 	}
 	var sr SolrResponse
-	u := fmt.Sprintf("%s/%s/select", nodeUris[0], s.collection)
+	u := fmt.Sprintf("%s/%s/select", nodeUri, s.collection)
 	body := bytes.NewBufferString(urlValues.Encode())
 	req, err := http.NewRequest("POST", u, body)
 	if err != nil {
@@ -153,7 +165,11 @@ func (s *solrHttp) Select(nodeUris []string, opts ...func(url.Values)) (SolrResp
 	if basicCred != "" {
 		req.Header.Add("Authorization", fmt.Sprintf("Basic %s", basicCred))
 	}
+	start := time.Now()
 	resp, err := s.queryClient.Do(req)
+	if s.router != nil {
+		s.router.AddSearchResult(time.Since(start), nodeUri, resp, err)
+	}
 	if err != nil {
 		return sr, err
 	}
@@ -360,6 +376,12 @@ func User(user string) func(*solrHttp) {
 func Password(password string) func(*solrHttp) {
 	return func(c *solrHttp) {
 		c.password = password
+	}
+}
+
+func QueryRouter(router Router) func(*solrHttp) {
+	return func(c *solrHttp) {
+		c.router = router
 	}
 }
 

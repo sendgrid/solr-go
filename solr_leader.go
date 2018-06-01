@@ -61,9 +61,11 @@ func findReplicas(key string, cs *Collection) (map[string]Replica, error) {
 	}
 	return replicas, nil
 }
+
 func isReplicaActive(r *Replica) bool {
 	return r.State == recoveringState || r.State == activeState
 }
+
 func isShardActive(s *Shard) bool {
 	return s.State == activeState
 }

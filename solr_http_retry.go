@@ -29,8 +29,7 @@ func (s *SolrHttpRetrier) Select(nodeUris []string, opts ...func(url.Values)) (S
 	var err error
 	backoff := s.exponentialBackoff
 	for attempt := 0; attempt < s.retries; attempt++ {
-		uri := nodeUris[attempt%len(nodeUris)]
-		resp, err = s.solrCli.Select([]string{uri}, opts...)
+		resp, err = s.solrCli.Select(nodeUris, opts...)
 		if err == ErrNotFound {
 			return resp, err
 		}
@@ -56,8 +55,7 @@ func (s *SolrHttpRetrier) Update(nodeUris []string, jsonDocs bool, doc interface
 	var err error
 	backoff := s.exponentialBackoff
 	for attempt := 0; attempt < s.retries; attempt++ {
-		uri := nodeUris[attempt%len(nodeUris)]
-		err = s.solrCli.Update([]string{uri}, jsonDocs, doc, opts...)
+		err = s.solrCli.Update(nodeUris, jsonDocs, doc, opts...)
 		if err == ErrNotFound {
 			return err
 		}
