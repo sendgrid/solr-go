@@ -1,7 +1,0 @@
-package: gopkg.in/sendgrid/gosolr.v1
-import:
-- package: github.com/samuel/go-zookeeper
-  subpackages:
-  - zk
-  - tree/master/zk
-- package: github.com/spaolacci/murmur3
