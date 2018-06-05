@@ -18,7 +18,12 @@ func (s adaptive) Swap(i, j int) {
 }
 
 func (s adaptive) Less(i, j int) bool {
-	return s[i].getErrors() < s[j].getErrors() && s[i].getAvgLatency() < s[j].getAvgLatency()
+	if s[i].getErrors() < s[j].getErrors() {
+		return true
+	} else if s[i].getErrors() == s[j].getErrors() && s[i].getAvgLatency() < s[j].getAvgLatency() {
+		return true
+	}
+	return false
 }
 
 type adaptiveRouter struct {
@@ -47,13 +52,13 @@ func (q *adaptiveRouter) GetUriFromList(urisIn []string) string {
 	return sorted[0]
 }
 
-func (q *adaptiveRouter) AddSearchResult(t time.Duration, uri string, resp *http.Response, err error) {
+func (q *adaptiveRouter) AddSearchResult(t time.Duration, uri string, statusCode int, err error) {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 	if _, ok := q.history[uri]; !ok {
 		q.history[uri] = newLatencyHistory(uri, q.recency)
 	}
-	success := (err != nil && resp.StatusCode == http.StatusOK)
+	success := (err == nil && statusCode >= http.StatusOK && statusCode < http.StatusBadRequest)
 	q.history[uri].addSearchResult(t, !success)
 }
 
@@ -92,7 +97,8 @@ func (u *searchHistory) getAvgLatency() time.Duration {
 	for i := 0; i < len(u.timings); i++ {
 		total += u.timings[i]
 	}
-	return total / time.Duration(len(u.timings))
+	result := total / time.Duration(len(u.timings))
+	return result
 }
 
 func NewAdaptiveRouter(recency int) Router {

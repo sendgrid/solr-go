@@ -67,7 +67,7 @@ func (s *solrHttp) Update(nodeUris []string, singleDoc bool, doc interface{}, op
 	if len(nodeUris) == 0 {
 		return fmt.Errorf("[SolrHTTP] nodeuris: empty node uris is not valid")
 	}
-	nodeUri := s.router.GetUriFromList(nodeUris)
+	nodeUri := nodeUris[0]
 	urlVals := url.Values{
 		"min_rf": {fmt.Sprintf("%d", s.minRf)},
 	}
@@ -103,7 +103,7 @@ func (s *solrHttp) Update(nodeUris []string, singleDoc bool, doc interface{}, op
 	start := time.Now()
 	resp, err := s.writeClient.Do(req)
 	if s.router != nil {
-		s.router.AddSearchResult(time.Since(start), nodeUri, resp, err)
+		s.router.AddSearchResult(time.Since(start), nodeUri, resp.StatusCode, err)
 	}
 	if err != nil {
 		return err
@@ -168,7 +168,7 @@ func (s *solrHttp) Select(nodeUris []string, opts ...func(url.Values)) (SolrResp
 	start := time.Now()
 	resp, err := s.queryClient.Do(req)
 	if s.router != nil {
-		s.router.AddSearchResult(time.Since(start), nodeUri, resp, err)
+		s.router.AddSearchResult(time.Since(start), nodeUri, resp.StatusCode, err)
 	}
 	if err != nil {
 		return sr, err

@@ -1,14 +1,13 @@
 package solr
 
 import (
-	"net/http"
 	"sync"
 	"time"
 )
 
 type Router interface {
 	GetUriFromList(urisIn []string) string
-	AddSearchResult(t time.Duration, uri string, resp *http.Response, err error)
+	AddSearchResult(t time.Duration, uri string, statusCode int, err error)
 }
 
 type roundRobinRouter struct {
@@ -36,7 +35,7 @@ func (r *roundRobinRouter) GetUriFromList(urisIn []string) string {
 	return result
 }
 
-func (r *roundRobinRouter) AddSearchResult(t time.Duration, uri string, resp *http.Response, err error) {
+func (r *roundRobinRouter) AddSearchResult(t time.Duration, uri string, statusCode int, err error) {
 	//no-op, updated on GetUriFromList
 }
 

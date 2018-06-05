@@ -55,7 +55,8 @@ func (s *SolrHttpRetrier) Update(nodeUris []string, jsonDocs bool, doc interface
 	var err error
 	backoff := s.exponentialBackoff
 	for attempt := 0; attempt < s.retries; attempt++ {
-		err = s.solrCli.Update(nodeUris, jsonDocs, doc, opts...)
+		uri := nodeUris[attempt%len(nodeUris)]
+		err = s.solrCli.Update([]string{uri}, jsonDocs, doc, opts...)
 		if err == ErrNotFound {
 			return err
 		}
