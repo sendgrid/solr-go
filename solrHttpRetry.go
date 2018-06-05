@@ -82,18 +82,10 @@ func (s *SolrHttpRetrier) Logger() Logger {
 	return s.solrCli.Logger()
 }
 
-//returns whether cap has been passed
+//exponential backoff of the backoffInterval and returns new backoffInterval
 func (s *SolrHttpRetrier) backoff(backoffInterval time.Duration) time.Duration {
-	//cap the time, whichever is less ,float
-	backoffInterval = time.Duration(backoffInterval.Nanoseconds() * 2)
-
+	backoffInterval = backoffInterval * time.Duration(2)
 	time.Sleep(backoffInterval)
 	return backoffInterval
 }
 
-func min(a, b time.Duration) time.Duration {
-	if a < b {
-		return time.Duration(a)
-	}
-	return time.Duration(b)
-}
