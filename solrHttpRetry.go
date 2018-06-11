@@ -88,4 +88,3 @@ func (s *SolrHttpRetrier) backoff(backoffInterval time.Duration) time.Duration {
 	time.Sleep(backoffInterval)
 	return backoffInterval
 }
-

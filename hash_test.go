@@ -1,32 +1,32 @@
 package solr
 
 import (
-	"testing"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-func TestHash(t *testing.T) {
-	t.Run("Test Hash with Doc ID", func(t *testing.T) {
-		expected := int32(-1530595841)
-		c := CompositeKey{
-			ShardKey: "foobar",
-			DocID:    "123",
-			Bits:     16,
-		}
-		hash := Hash(c)
-		if hash != expected {
-			t.Errorf("Error in TestHash. Expected %d but got %d", expected, hash)
-		}
+var _ = Describe("Hash Functions", func() {
+	Describe("Hash with Doc ID", func() {
+		It("is created", func() {
+			expected := int32(-1530629653)
+			c := CompositeKey{
+				ShardKey: "foobar",
+				DocID:    "123",
+				Bits:     16,
+			}
+			hash := Hash(c)
+			Expect(hash).To(BeEquivalentTo(expected))
+		})
 	})
-
-	t.Run("Test Hash without Doc ID", func(t *testing.T) {
-		expected := int32(-1530604355)
-		c := CompositeKey{
-			ShardKey: "foobar",
-			Bits:     16,
-		}
-		hash := Hash(c)
-		if hash != expected {
-			t.Errorf("Error in TestHash. Expected %d but got %d", expected, hash)
-		}
+	Describe("Hash without Doc ID", func() {
+		It("is created", func() {
+			expected := int32(-1530658816)
+			c := CompositeKey{
+				ShardKey: "foobar",
+				Bits:     16,
+			}
+			hash := Hash(c)
+			Expect(hash).To(BeEquivalentTo(expected))
+		})
 	})
-}
+})

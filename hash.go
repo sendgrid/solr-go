@@ -7,11 +7,10 @@ import (
 )
 
 func Hash(key CompositeKey) int32 {
-	mask := 16 - key.Bits
-	masks := []int32{
-		-1 << mask, // -10000000000000000
-		65535,      // 1111111111111111
-	}
+	mask := 32 - key.Bits
+	mask0 := int32(-1 << mask)
+	mask1 := int32(-1 ^ mask0)
+
 	hashes := make([]int32, 2)
 	hashes[0] = int32(murmur3.Sum32([]byte(key.ShardKey)))
 	if key.DocID != "" {
@@ -19,7 +18,7 @@ func Hash(key CompositeKey) int32 {
 	} else {
 		hashes[1] = int32(0)
 	}
-	return (hashes[0] & masks[0]) | (hashes[1] & masks[1])
+	return (hashes[0] & mask0) | (hashes[1] & mask1)
 }
 
 func ConvertToHashRange(hashRange string) (HashRange, error) {

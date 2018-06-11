@@ -74,17 +74,14 @@ type HashRange struct {
 }
 
 func NewCompositeKey(id string) (CompositeKey, error) {
-	keys := strings.Split(id, "!")
 
-	if len(keys) == 1 {
-		if !strings.Contains(id, "!") {
-			return CompositeKey{DocID: keys[0]}, nil
-		} else {
-			return CompositeKey{ShardKey: id}, nil
-		}
+	if !strings.Contains(id, "!") {
+		return CompositeKey{DocID: id}, nil
 	}
-
-	if len(keys) == 2 {
+	keys := strings.Split(id, "!")
+	if len(keys) == 1 {
+		return CompositeKey{ShardKey: id}, nil
+	} else if len(keys) == 2 {
 		shard := keys[0]
 		bitShift := 0
 		var err error
@@ -102,12 +99,7 @@ func NewCompositeKey(id string) (CompositeKey, error) {
 		}
 		return CompositeKey{ShardKey: keys[0], DocID: shard, Bits: uint(bitShift)}, nil
 	}
-
-	if len(keys) > 2 {
-		return CompositeKey{}, fmt.Errorf("Cant deal with composite keys %s", id)
-	}
-
-	panic("failed all cases")
+	return CompositeKey{}, fmt.Errorf("Cant deal with composite keys %s", id)
 }
 
 type ClusterProps struct {
