@@ -6,9 +6,9 @@ do
     sleep 1
 done
 
-solr zk mkroot /solr -z zk:2181
+solr zk mkroot /$1 -z zk:2181
 
-LN_OUTPUT=stderr solr start -f -z zk:2181/solr > /dev/null &
+LN_OUTPUT=stderr solr start -f -v -z zk:2181/$1 > /dev/null &
 
 until curl localhost:8983
 do
@@ -16,12 +16,15 @@ do
     sleep 1
 done
 
-solr zk -upconfig -d /opt/solr/solrtest -n solrtest -z zk:2181/solr
+solr zk -upconfig -d /opt/solr/solrtest -n solrtest -z zk:2181/$1
 sleep 1
 solr create_collection -c solrtest -n solrtest -shards 1 -replicationFactor 3
 
-/opt/solr/server/scripts/cloud-scripts/zkcli.sh -zkhost zk:2181/solr -cmd put /security.json '{"authentication": {"class": "solr.BasicAuthPlugin","blockUnknown": true,"credentials": {"solr": "J0IbXqNMOsK6fvu3EseKuMiBiXAeRo51a6OoJBEbPEU= yLhT0cqEvO7CCkBUEZSDBQgTT/50CbfW0WjjC2YZchc="}},"authorization": {"class": "solr.RuleBasedAuthorizationPlugin","permissions": [{"name": "security-edit","role": "admin"}],"user-role": {"solr": "admin"}}}'
+/opt/solr/server/scripts/cloud-scripts/zkcli.sh -zkhost zk:2181/$1 -cmd put /security.json '{"authentication": {"class": "solr.BasicAuthPlugin","blockUnknown": true,"credentials": {"solr": "J0IbXqNMOsK6fvu3EseKuMiBiXAeRo51a6OoJBEbPEU= yLhT0cqEvO7CCkBUEZSDBQgTT/50CbfW0WjjC2YZchc="}},"authorization": {"class": "solr.RuleBasedAuthorizationPlugin","permissions": [{"name": "security-edit","role": "admin"}],"user-role": {"solr": "admin"}}}'
 
-/opt/solr/server/scripts/cloud-scripts/zkcli.sh -zkhost zk:2181/solr -cmd clusterprop -name urlScheme -val "http"
+/opt/solr/server/scripts/cloud-scripts/zkcli.sh -zkhost zk:2181/$1 -cmd clusterprop -name urlScheme -val "http"
 
-tail -f /dev/null
+for (( ; ; ))
+do
+    tail -f /opt/solr/server/logs/solr.log | grep LEADER
+done

@@ -44,5 +44,19 @@ solrClient.Update(locator.GetLeadersAndReplicas("{anydocidtoroute}"),collectionN
 2. ``` docker-compose run gotests bash ```
 3. ```go test```
 
+
+## Tests in cluster mode
+1. `docker-compose -f docker-compose.cluster.yml up`
+2. ``` docker-compose run gotests bash ```
+3. ```go test```
+
+
+## Data Load & Query
+1. `docker-compose -f docker-compose.cluster.yml up`
+2. ``` docker-compose run gotests bash ```
+3. ```go run ./cmd/solrRunner.go 10 10```
+
+
+
 ## License
 [The MIT License (MIT)](LICENSE)

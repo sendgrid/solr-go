@@ -19,7 +19,7 @@ var (
 
 func init() {
 	var err error
-	solrZk = NewSolrZK("zk:2181", "solr", "solrtest")
+	solrZk = NewSolrZK("zk:2181", "cluster", "solrtest")
 	locator = solrZk.GetSolrLocator()
 	err = solrZk.Listen()
 	if err != nil {
@@ -41,36 +41,27 @@ func main() {
 	fmt.Println(os.Args)
 
 	//get first arg number
-	if len(os.Args) > 0 {
+	if len(os.Args) > 1 {
 		var err error
-		limit, err = strconv.Atoi(os.Args[0])
+		limit, err = strconv.Atoi(os.Args[1])
 		if err != nil {
-			limit, err = strconv.Atoi(os.Args[1])
-			if err != nil {
-				panic(fmt.Sprintln("could not convert limit to int"))
-			}
+			panic(fmt.Sprintln("could not convert limit to int"))
 		}
 	}
-	numFound, err := run(limit, "/3")
-	if err != nil {
-		panic(err)
-	}
+	numFound := run(limit, "/3")
 	if limit != int(numFound) {
 		panic(fmt.Sprintf("limit did not match what was found %d=%d", limit, numFound))
 	}
 	fmt.Println(fmt.Sprintf("runner done %d", numFound))
 
-	numFound, err = run(limit, "")
-	if err != nil {
-		panic(err)
-	}
+	numFound = run(limit, "")
 	if limit != int(numFound) {
 		panic(fmt.Sprintf("limit did not match what was found %d=%d", limit, numFound))
 	}
 	fmt.Println(fmt.Sprintf("runner done %d", numFound))
 }
 
-func run(limit int, bits string) (uint32, error) {
+func run(limit int, bits string) uint32 {
 	shardKeys := []string{}
 	for i := 0; i < 10; i++ {
 		uuid, _ := newUUID()
@@ -102,14 +93,19 @@ func run(limit int, bits string) (uint32, error) {
 				panic(err)
 			}
 		}
-
 	}
+	//wait for commits
+	time.Sleep(time.Second)
+
 	replicas, err := locator.GetReplicaUris()
 
 	if err != nil {
 		panic(err)
 	}
 	r, err := solrHttpRetrier.Select(replicas, Query("*:*"), FilterQuery("last_name:"+uuid), Rows(uint32(limit)))
+	if err != nil {
+		panic(fmt.Sprintf("error %v getting count on %v", err, replicas))
+	}
 	sum := 0
 	for i := 0; i < 10; i++ {
 		shardKey := shardKeys[i%10]
@@ -125,11 +121,9 @@ func run(limit int, bits string) (uint32, error) {
 		}
 		sum += int(check.Response.NumFound)
 		fmt.Println(fmt.Sprintf("sum is %d", sum))
-
-		//	fmt.Println(fmt.Sprintf("%s hit %d", shardKey, check.Response.NumFound))
 	}
 	fmt.Println(fmt.Sprintf("sum is %d", sum))
-	return r.Response.NumFound, err
+	return r.Response.NumFound
 
 }
 func newUUID() (string, error) {
