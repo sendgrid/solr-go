@@ -30,7 +30,7 @@ var _ = Describe("Solr Client", func() {
 	var solrHttp solr.SolrHTTP
 	var solrHttpRetrier solr.SolrHTTP
 	var locator solr.SolrLocator
-	solrClient = solr.NewSolrZK("zk:2181", "solr", "solrtest")
+	solrClient = solr.NewSolrZK("zk:2181", "noncluster", "solrtest")
 	locator = solrClient.GetSolrLocator()
 
 	err := solrClient.Listen()
@@ -42,7 +42,7 @@ var _ = Describe("Solr Client", func() {
 		solrHttpRetrier = solr.NewSolrHttpRetrier(solrHttp, 5, 100*time.Millisecond)
 	})
 	It("construct", func() {
-		solrClient := solr.NewSolrZK("test", "solr", "solrtest")
+		solrClient := solr.NewSolrZK("test", "noncluster", "solrtest")
 		Expect(solrClient).To(Not(BeNil()))
 		err := solrClient.Listen()
 		Expect(err).To(Not(BeNil()))
@@ -332,7 +332,7 @@ var _ = Describe("Solr Client", func() {
 	})
 	Describe("Basic Auth Fails", func() {
 		It("can get requests", func() {
-			solrNoAuthClient := solr.NewSolrZK("zk:2181", "solr", "solrtest")
+			solrNoAuthClient := solr.NewSolrZK("zk:2181", "noncluster", "solrtest")
 			err := solrNoAuthClient.Listen()
 			Expect(err).To(BeNil())
 			https, _ := solrClient.UseHTTPS()

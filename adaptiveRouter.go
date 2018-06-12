@@ -20,7 +20,7 @@ func (s adaptive) Swap(i, j int) {
 func (s adaptive) Less(i, j int) bool {
 	if s[i].getErrors() < s[j].getErrors() {
 		return true
-	} else if s[i].getErrors() == s[j].getErrors() && s[i].getAvgLatency() < s[j].getAvgLatency() {
+	} else if s[i].getErrors() == s[j].getErrors() && s[i].getMedianLatency() < s[j].getMedianLatency() {
 		return true
 	}
 	return false
@@ -40,7 +40,7 @@ func (q *adaptiveRouter) GetUriFromList(urisIn []string) string {
 		if v, ok := q.history[uri]; ok {
 			searchHistory[i] = v
 		} else {
-			searchHistory[i] = newLatencyHistory(uri, q.recency)
+			searchHistory[i] = newSearchHistory(uri, q.recency)
 		}
 	}
 
@@ -56,7 +56,7 @@ func (q *adaptiveRouter) AddSearchResult(t time.Duration, uri string, statusCode
 	q.lock.Lock()
 	defer q.lock.Unlock()
 	if _, ok := q.history[uri]; !ok {
-		q.history[uri] = newLatencyHistory(uri, q.recency)
+		q.history[uri] = newSearchHistory(uri, q.recency)
 	}
 	success := (err == nil && statusCode >= http.StatusOK && statusCode < http.StatusBadRequest)
 	q.history[uri].addSearchResult(t, !success)
@@ -67,13 +67,16 @@ type searchHistory struct {
 	errors  []bool
 	uri     string
 	offset  int
+	lock    *sync.RWMutex
 }
 
-func newLatencyHistory(uri string, recency int) *searchHistory {
-	return &searchHistory{uri: uri, timings: make([]time.Duration, recency), errors: make([]bool, recency)}
+func newSearchHistory(uri string, recency int) *searchHistory {
+	return &searchHistory{uri: uri, timings: make([]time.Duration, recency), errors: make([]bool, recency), lock: &sync.RWMutex{}}
 }
 
 func (u *searchHistory) addSearchResult(timing time.Duration, error bool) {
+	u.lock.Lock()
+	defer u.lock.Unlock()
 	u.timings[u.offset] = timing
 	u.errors[u.offset] = error
 	u.offset++
@@ -83,6 +86,8 @@ func (u *searchHistory) addSearchResult(timing time.Duration, error bool) {
 }
 
 func (u *searchHistory) getErrors() int {
+	u.lock.RLock()
+	defer u.lock.RUnlock()
 	errors := 0
 	for i := 0; i < len(u.errors); i++ {
 		if u.errors[i] {
@@ -92,13 +97,13 @@ func (u *searchHistory) getErrors() int {
 	return errors
 }
 
-func (u *searchHistory) getAvgLatency() time.Duration {
-	total := time.Duration(0)
-	for i := 0; i < len(u.timings); i++ {
-		total += u.timings[i]
-	}
-	result := total / time.Duration(len(u.timings))
-	return result
+func (u *searchHistory) getMedianLatency() time.Duration {
+	u.lock.RLock()
+	defer u.lock.RUnlock()
+	tmp := make([]time.Duration, len(u.timings))
+	copy(tmp, u.timings)
+	sort.Slice(tmp, func(i, j int) bool { return tmp[i] < tmp[j]})
+	return tmp[len(u.timings)/2]
 }
 
 func NewAdaptiveRouter(recency int) Router {
