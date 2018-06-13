@@ -14,11 +14,13 @@ services:
     image: solr:6.6.0
     ports:
         - "7983:8983"
-    command: "/opt/solr/solrtest/start-solr noncluster"
+    command: "/opt/solr/solrtest/start-solr"
     volumes:
       - "./bin:/opt/solr/solrtest:rw"
     networks:
       - noncluster
+    environment:
+      ZK_ROOT: noncluster
 
   gotests:
     build: .
@@ -28,6 +30,8 @@ services:
       - "./bin:/tmp/bin"
     networks:
       - noncluster
+    environment:
+      ZK_ROOT: noncluster
 
 networks:
   noncluster:

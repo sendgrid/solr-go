@@ -18,6 +18,8 @@ services:
       - "./bin:/opt/solr/solrtest:rw"
     networks:
       - cluster
+    environment:
+      ZK_ROOT: cluster
 
   solr2:
     image: solr:6.6.4
@@ -28,6 +30,8 @@ services:
       - "./bin:/opt/solr/solrtest:rw"
     networks:
       - cluster
+    environment:
+      ZK_ROOT: cluster
 
   solr3:
     image: solr:6.6.4
@@ -38,6 +42,8 @@ services:
       - "./bin:/opt/solr/solrtest:rw"
     networks:
       - cluster
+    environment:
+      ZK_ROOT: cluster
 
   gotests:
     build: .
@@ -47,6 +53,8 @@ services:
       - "./bin:/tmp/bin"
     networks:
       - cluster
+    environment:
+      ZK_ROOT: cluster
 
 networks:
   cluster:

@@ -10,6 +10,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/sendgrid/go-solr"
+	"os"
 )
 
 func newUUID() (string, error) {
@@ -30,7 +31,7 @@ var _ = Describe("Solr Client", func() {
 	var solrHttp solr.SolrHTTP
 	var solrHttpRetrier solr.SolrHTTP
 	var locator solr.SolrLocator
-	solrClient = solr.NewSolrZK("zk:2181", "noncluster", "solrtest")
+	solrClient = solr.NewSolrZK("zk:2181", os.Getenv("ZK_ROOT"), "solrtest")
 	locator = solrClient.GetSolrLocator()
 
 	err := solrClient.Listen()
@@ -42,7 +43,7 @@ var _ = Describe("Solr Client", func() {
 		solrHttpRetrier = solr.NewSolrHttpRetrier(solrHttp, 5, 100*time.Millisecond)
 	})
 	It("construct", func() {
-		solrClient := solr.NewSolrZK("test", "noncluster", "solrtest")
+		solrClient := solr.NewSolrZK("test", os.Getenv("ZK_ROOT"), "solrtest")
 		Expect(solrClient).To(Not(BeNil()))
 		err := solrClient.Listen()
 		Expect(err).To(Not(BeNil()))
@@ -332,7 +333,7 @@ var _ = Describe("Solr Client", func() {
 	})
 	Describe("Basic Auth Fails", func() {
 		It("can get requests", func() {
-			solrNoAuthClient := solr.NewSolrZK("zk:2181", "noncluster", "solrtest")
+			solrNoAuthClient := solr.NewSolrZK("zk:2181", os.Getenv("ZK_ROOT"), "solrtest")
 			err := solrNoAuthClient.Listen()
 			Expect(err).To(BeNil())
 			https, _ := solrClient.UseHTTPS()

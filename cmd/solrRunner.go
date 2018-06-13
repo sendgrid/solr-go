@@ -19,7 +19,7 @@ var (
 
 func init() {
 	var err error
-	solrZk = NewSolrZK("zk:2181", "cluster", "solrtest")
+	solrZk = NewSolrZK("zk:2181", os.Getenv("ZK_ROOT"), "solrtest")
 	locator = solrZk.GetSolrLocator()
 	err = solrZk.Listen()
 	if err != nil {
@@ -29,7 +29,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	solrHttp, err := NewSolrHTTP(https, "solrtest", User("solr"), Password("admin"), MinRF(2))
+	solrHttp, err := NewSolrHTTP(https, "solrtest", User("solr"), Password("admin"), MinRF(2), QueryRouter(NewRoundRobinRouter()))
 	if err != nil {
 		panic(err)
 	}
