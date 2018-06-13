@@ -1,0 +1,26 @@
+zk:
+  image: wurstmeister/zookeeper
+
+  volumes:
+    - "./bin:/tmp/bin"
+  command: /tmp/bin/start-zk
+
+solr1:
+  image: solr:6.6.0
+  ports:
+      - "7983:8983"
+  command: "/opt/solr/solrtest/start-solr"
+  links:
+    - zk
+  volumes:
+    - "./bin:/opt/solr/solrtest:rw"
+
+gotests:
+  build: .
+  command:  /tmp/bin/solr-tests
+  links:
+    - zk
+    - solr1
+  volumes:
+    - ".:/go/src/github.com/sendgrid/go-solr:rw"
+    - "./bin:/tmp/bin"

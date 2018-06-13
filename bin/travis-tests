@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-docker-compose run gotests /tmp/bin/solr-tests
+docker-compose -p tests -f docker-compose.travis.yml run gotests /tmp/bin/solr-tests

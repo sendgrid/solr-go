@@ -6,8 +6,6 @@ services:
     volumes:
       - "./bin:/tmp/bin"
     command: /tmp/bin/start-zk
-    networks:
-      - cluster
 
   solr1:
     image: solr:6.6.4
@@ -16,10 +14,6 @@ services:
       - "8981:8983"
     volumes:
       - "./bin:/opt/solr/solrtest:rw"
-    networks:
-      - cluster
-    environment:
-      ZK_ROOT: cluster
 
   solr2:
     image: solr:6.6.4
@@ -28,10 +22,6 @@ services:
       - "8982:8983"
     volumes:
       - "./bin:/opt/solr/solrtest:rw"
-    networks:
-      - cluster
-    environment:
-      ZK_ROOT: cluster
 
   solr3:
     image: solr:6.6.4
@@ -40,10 +30,6 @@ services:
       - "8983:8983"
     volumes:
       - "./bin:/opt/solr/solrtest:rw"
-    networks:
-      - cluster
-    environment:
-      ZK_ROOT: cluster
 
   gotests:
     build: .
@@ -51,10 +37,3 @@ services:
     volumes:
       - ".:/go/src/github.com/sendgrid/go-solr:rw"
       - "./bin:/tmp/bin"
-    networks:
-      - cluster
-    environment:
-      ZK_ROOT: cluster
-
-networks:
-  cluster:

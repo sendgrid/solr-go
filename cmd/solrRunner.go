@@ -19,7 +19,7 @@ var (
 
 func init() {
 	var err error
-	solrZk = NewSolrZK("zk:2181", os.Getenv("ZK_ROOT"), "solrtest")
+	solrZk = NewSolrZK("zk:2181", "solr", "solrtest")
 	locator = solrZk.GetSolrLocator()
 	err = solrZk.Listen()
 	if err != nil {

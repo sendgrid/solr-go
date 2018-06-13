@@ -102,7 +102,7 @@ func (u *searchHistory) getMedianLatency() time.Duration {
 	defer u.lock.RUnlock()
 	tmp := make([]time.Duration, len(u.timings))
 	copy(tmp, u.timings)
-	sort.Slice(tmp, func(i, j int) bool { return tmp[i] < tmp[j]})
+	sort.Slice(tmp, func(i, j int) bool { return tmp[i] < tmp[j] })
 	return tmp[len(u.timings)/2]
 }
 

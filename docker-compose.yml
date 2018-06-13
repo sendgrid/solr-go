@@ -7,8 +7,6 @@ services:
     volumes:
       - "./bin:/tmp/bin"
     command: /tmp/bin/start-zk
-    networks:
-      - noncluster
 
   solr1:
     image: solr:6.6.0
@@ -17,10 +15,6 @@ services:
     command: "/opt/solr/solrtest/start-solr"
     volumes:
       - "./bin:/opt/solr/solrtest:rw"
-    networks:
-      - noncluster
-    environment:
-      ZK_ROOT: noncluster
 
   gotests:
     build: .
@@ -28,10 +22,3 @@ services:
     volumes:
       - ".:/go/src/github.com/sendgrid/go-solr:rw"
       - "./bin:/tmp/bin"
-    networks:
-      - noncluster
-    environment:
-      ZK_ROOT: noncluster
-
-networks:
-  noncluster:
