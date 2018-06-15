@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -17,24 +18,25 @@ import (
 )
 
 type solrHttp struct {
-	user                string
-	password            string
-	queryClient         HTTPer
-	writeClient         HTTPer
-	solrZk              SolrZK
-	collection          string
-	cert                string
-	defaultRows         uint32
-	minRf               int
-	logger              Logger
-	insecureSkipVerify  bool
-	writeTimeoutSeconds int
-	readTimeoutSeconds  int
-	router              Router
+	user                  string
+	password              string
+	queryClient           HTTPer
+	writeClient           HTTPer
+	solrZk                SolrZK
+	collection            string
+	cert                  string
+	defaultRows           uint32
+	minRf                 int
+	logger                Logger
+	insecureSkipVerify    bool
+	writeTimeoutSeconds   int
+	readTimeoutSeconds    int
+	connectTimeoutSeconds int
+	router                Router
 }
 
 func NewSolrHTTP(useHTTPS bool, collection string, options ...func(*solrHttp)) (SolrHTTP, error) {
-	solrCli := solrHttp{collection: collection, minRf: 1, insecureSkipVerify: false, readTimeoutSeconds: 20, writeTimeoutSeconds: 30}
+	solrCli := solrHttp{collection: collection, minRf: 1, insecureSkipVerify: false, readTimeoutSeconds: 20, writeTimeoutSeconds: 30, connectTimeoutSeconds: 5}
 	logger := log.New(os.Stdout, "[SolrClient] ", log.LstdFlags)
 	solrCli.logger = &SolrLogger{logger}
 	for _, opt := range options {
@@ -43,14 +45,14 @@ func NewSolrHTTP(useHTTPS bool, collection string, options ...func(*solrHttp)) (
 
 	var err error
 	if solrCli.writeClient == nil {
-		solrCli.writeClient, err = getClient(solrCli.cert, useHTTPS, solrCli.insecureSkipVerify, solrCli.writeTimeoutSeconds)
+		solrCli.writeClient, err = getClient(solrCli.cert, useHTTPS, solrCli.insecureSkipVerify, solrCli.writeTimeoutSeconds, solrCli.connectTimeoutSeconds)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	if solrCli.queryClient == nil {
-		solrCli.queryClient, err = getClient(solrCli.cert, useHTTPS, solrCli.insecureSkipVerify, solrCli.readTimeoutSeconds)
+		solrCli.queryClient, err = getClient(solrCli.cert, useHTTPS, solrCli.insecureSkipVerify, solrCli.readTimeoutSeconds, solrCli.connectTimeoutSeconds)
 		if err != nil {
 			return nil, err
 		}
@@ -304,16 +306,24 @@ func UrlVals(urlVals url.Values) func(url.Values) {
 	}
 }
 
-func getClient(cert string, https bool, insecureSkipVerify bool, timeoutSeconds int) (HTTPer, error) {
+func getClient(cert string, https bool, insecureSkipVerify bool, timeoutSeconds int, connectTimeoutSeconds int) (HTTPer, error) {
+	connectTimeout := time.Duration(connectTimeoutSeconds) * time.Second
 	cli := &http.Client{
 		Timeout: time.Duration(timeoutSeconds) * time.Second,
+		Transport: &http.Transport{
+			MaxIdleConnsPerHost: 10,
+			DialContext:         (&net.Dialer{Timeout: connectTimeout}).DialContext},
 	}
 	if https {
 		tlsConfig, err := getTLSConfig(cert, insecureSkipVerify)
 		if err != nil {
 			return nil, err
 		}
-		cli.Transport = &http.Transport{TLSClientConfig: tlsConfig, MaxIdleConnsPerHost: 10}
+		cli.Transport = &http.Transport{
+			TLSClientConfig:     tlsConfig,
+			MaxIdleConnsPerHost: 10,
+			DialContext:         (&net.Dialer{Timeout: connectTimeout}).DialContext,
+		}
 	}
 	return cli, nil
 }
@@ -400,6 +410,12 @@ func WriteTimeout(seconds int) func(*solrHttp) {
 func ReadTimeout(seconds int) func(*solrHttp) {
 	return func(c *solrHttp) {
 		c.readTimeoutSeconds = seconds
+	}
+}
+
+func ConnectionTimeout(seconds int) func(*solrHttp) {
+	return func(c *solrHttp) {
+		c.connectTimeoutSeconds = seconds
 	}
 }
 
