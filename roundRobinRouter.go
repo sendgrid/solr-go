@@ -24,11 +24,9 @@ func (r *roundRobinRouter) GetUriFromList(urisIn []string) string {
 		if v, ok := r.lastQuery[uri]; !ok {
 			result = uri
 			break
-		} else {
-			if (oldestValue == time.Time{}) || v.Before(oldestValue) {
-				oldestValue = v
-				result = uri
-			}
+		} else if (oldestValue == time.Time{}) || v.Before(oldestValue) {
+			oldestValue = v
+			result = uri
 		}
 	}
 	r.lastQuery[result] = time.Now()

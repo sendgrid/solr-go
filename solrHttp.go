@@ -89,8 +89,8 @@ func (s *solrHttp) Update(nodeUris []string, singleDoc bool, doc interface{}, op
 			return err
 		}
 	}
-	req, err := http.NewRequest("POST", uri, &buf)
 
+	req, err := http.NewRequest("POST", uri, &buf)
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (s *solrHttp) Update(nodeUris []string, singleDoc bool, doc interface{}, op
 	resp, err := s.writeClient.Do(req)
 	if resp != nil {
 		s.router.AddSearchResult(time.Since(start), nodeUri, resp.StatusCode, err)
-	} else if resp == nil  {
+	} else if resp == nil {
 		s.router.AddSearchResult(time.Since(start), nodeUri, http.StatusInternalServerError, err)
 	}
 	if err != nil {
@@ -123,10 +123,10 @@ func (s *solrHttp) Update(nodeUris []string, singleDoc bool, doc interface{}, op
 		}
 		if resp.StatusCode < 500 {
 			return NewSolrError(resp.StatusCode, string(htmlData))
-		} else {
-			return NewSolrInternalError(resp.StatusCode, string(htmlData))
 		}
+		return NewSolrInternalError(resp.StatusCode, string(htmlData))
 	}
+
 	var r UpdateResponse
 	dec := json.NewDecoder(resp.Body)
 	if err := dec.Decode(&r); err != nil {
@@ -148,8 +148,8 @@ func (s *solrHttp) Select(nodeUris []string, opts ...func(url.Values)) (SolrResp
 	if len(nodeUris) == 0 {
 		return SolrResponse{}, fmt.Errorf("[SolrHTTP] nodeuris: empty node uris is not valid")
 	}
-	nodeUri := s.router.GetUriFromList(nodeUris)
 
+	nodeUri := s.router.GetUriFromList(nodeUris)
 	var err error
 	urlValues := url.Values{
 		"wt": {"json"},
@@ -157,6 +157,7 @@ func (s *solrHttp) Select(nodeUris []string, opts ...func(url.Values)) (SolrResp
 	for _, opt := range opts {
 		opt(urlValues)
 	}
+
 	var sr SolrResponse
 	u := fmt.Sprintf("%s/%s/select", nodeUri, s.collection)
 	body := bytes.NewBufferString(urlValues.Encode())
@@ -173,7 +174,7 @@ func (s *solrHttp) Select(nodeUris []string, opts ...func(url.Values)) (SolrResp
 	resp, err := s.queryClient.Do(req)
 	if resp != nil {
 		s.router.AddSearchResult(time.Since(start), nodeUri, resp.StatusCode, err)
-	} else if resp == nil  {
+	} else if resp == nil {
 		s.router.AddSearchResult(time.Since(start), nodeUri, http.StatusInternalServerError, err)
 	}
 	if err != nil {

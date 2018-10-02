@@ -49,11 +49,11 @@ func findShard(key string, cs *Collection) (*Shard, error) {
 }
 
 func findReplicas(key string, cs *Collection) (map[string]Replica, error) {
-	replicas := make(map[string]Replica)
 	shard, err := findShard(key, cs)
 	if err != nil {
 		return nil, err
 	}
+	replicas := make(map[string]Replica)
 	for k, v := range shard.Replicas {
 		if isReplicaActive(&v) {
 			replicas[k] = v

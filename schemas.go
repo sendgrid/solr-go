@@ -74,16 +74,16 @@ type HashRange struct {
 }
 
 func NewCompositeKey(id string) (CompositeKey, error) {
-
 	if !strings.Contains(id, "!") {
 		return CompositeKey{DocID: id}, nil
 	}
+
 	keys := strings.Split(id, "!")
 	if len(keys) == 1 {
 		return CompositeKey{ShardKey: id}, nil
 	} else if len(keys) == 2 {
 		shard := keys[0]
-		bitShift := 0
+		var bitShift int
 		var err error
 		i := strings.Index(shard, "/")
 		if i > 0 {

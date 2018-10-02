@@ -73,20 +73,19 @@ func (s *solrZkInstance) GetLeaders(docID string) ([]string, error) {
 }
 
 func (s *solrZkInstance) GetLeadersAndReplicas(docID string) ([]string, error) {
-	leaderCount := 0
-	var uris []string
+	var leaderCount int
 	leaders, err := s.GetLeaders(docID)
 	if err != nil {
-		return uris, err
+		return nil, err
 	}
 	keys := strings.Split(docID, "!")
 	replicas, err := s.GetReplicasFromRoute(keys[0])
 	if err != nil {
-		return uris, err
+		return nil, err
 	}
 
 	set := make(map[string]bool, len(leaders)+len(replicas))
-	var all []string = make([]string, 0, len(replicas))
+	all := make([]string, 0, len(replicas))
 	for _, v := range leaders {
 		set[v] = true
 		if v != "" {
@@ -137,13 +136,13 @@ func (s *solrZkInstance) GetReplicaUris() ([]string, error) {
 	}
 	cs, err := s.GetClusterState()
 	if err != nil {
+		// technically this is never reached, s.GetClusterState always returns nil
 		return []string{}, nil
 	}
 	nodes := cs.LiveNodes
 	uris := make([]string, len(nodes))
 	for i, v := range nodes {
-		host := fmt.Sprintf("%s://%s/v2/c", protocol, v)
-		uris[i] = host
+		uris[i] = fmt.Sprintf("%s://%s/v2/c", protocol, v)
 	}
 	return shuffleNodes(uris), nil
 
