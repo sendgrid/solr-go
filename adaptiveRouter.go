@@ -45,11 +45,7 @@ func (q *adaptiveRouter) GetUriFromList(urisIn []string) string {
 	}
 
 	sort.Sort(searchHistory)
-	sorted := make([]string, len(searchHistory))
-	for i, uri := range searchHistory {
-		sorted[i] = uri.uri
-	}
-	return sorted[0]
+	return searchHistory[0].uri
 }
 
 func (q *adaptiveRouter) AddSearchResult(t time.Duration, uri string, statusCode int, err error) {
@@ -71,7 +67,12 @@ type searchHistory struct {
 }
 
 func newSearchHistory(uri string, recency int) *searchHistory {
-	return &searchHistory{uri: uri, timings: make([]time.Duration, recency), errors: make([]bool, recency), lock: &sync.RWMutex{}}
+	return &searchHistory{
+		uri:     uri,
+		timings: make([]time.Duration, recency),
+		errors:  make([]bool, recency),
+		lock:    &sync.RWMutex{},
+	}
 }
 
 func (u *searchHistory) addSearchResult(timing time.Duration, error bool) {
@@ -88,7 +89,7 @@ func (u *searchHistory) addSearchResult(timing time.Duration, error bool) {
 func (u *searchHistory) getErrors() int {
 	u.lock.RLock()
 	defer u.lock.RUnlock()
-	errors := 0
+	var errors int
 	for i := 0; i < len(u.errors); i++ {
 		if u.errors[i] {
 			errors++
@@ -107,5 +108,9 @@ func (u *searchHistory) getMedianLatency() time.Duration {
 }
 
 func NewAdaptiveRouter(recency int) Router {
-	return &adaptiveRouter{history: make(map[string]*searchHistory), recency: recency, lock: &sync.RWMutex{}}
+	return &adaptiveRouter{
+		history: make(map[string]*searchHistory),
+		recency: recency,
+		lock:    &sync.RWMutex{},
+	}
 }
