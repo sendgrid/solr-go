@@ -5,6 +5,7 @@
 [![GoDoc](https://godoc.org/github.com/sendgrid/go-solr?status.svg)](https://godoc.org/github.com/sendgrid/go-solr)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![CLA assistant](https://cla.sendgrid.com/readme/badge/sendgrid/go-solr)](https://cla.sendgrid.com/sendgrid/go-solr)
+[![GitHub contributors](https://img.shields.io/github/contributors/sendgrid/docs.svg)](https://github.com/sendgrid/go-solr/graphs/contributors)
 
 # go-solr
 solr go client from Sendgrid
