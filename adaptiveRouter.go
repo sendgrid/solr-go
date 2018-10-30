@@ -45,11 +45,7 @@ func (q *adaptiveRouter) GetUriFromList(urisIn []string) string {
 	}
 
 	sort.Sort(searchHistory)
-	sorted := make([]string, len(searchHistory))
-	for i, uri := range searchHistory {
-		sorted[i] = uri.uri
-	}
-	return sorted[0]
+	return searchHistory[0].uri
 }
 
 func (q *adaptiveRouter) AddSearchResult(t time.Duration, uri string, statusCode int, err error) {
