@@ -35,6 +35,9 @@ type solrHttp struct {
 	router                Router
 }
 
+// M is a shortcut for map[string]interface{}
+type M map[string]interface{}
+
 func NewSolrHTTP(useHTTPS bool, collection string, options ...func(*solrHttp)) (SolrHTTP, error) {
 	solrCli := solrHttp{collection: collection, minRf: 1, insecureSkipVerify: false, readTimeoutSeconds: 20, writeTimeoutSeconds: 30, connectTimeoutSeconds: 5}
 	logger := log.New(os.Stdout, "[SolrClient] ", log.LstdFlags)
@@ -300,6 +303,16 @@ func Commit(commit bool) func(url.Values) {
 func Cursor(c string) func(url.Values) {
 	return func(p url.Values) {
 		p["cursorMark"] = []string{c}
+	}
+}
+
+// JSONFacet helper function for defining JSON Facets.
+func JSONFacet(opts M) func(url.Values) {
+	jsonFacet, err := json.Marshal(opts)
+	return func(p url.Values) {
+		if err == nil {
+			p["json.facet"] = []string{string(jsonFacet)}
+		}
 	}
 }
 
