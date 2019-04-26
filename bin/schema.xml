@@ -10,6 +10,9 @@
   <field name="created_at" type="date" indexed="true" stored="true" />
   <field name="updated_at" type="date" indexed="true" stored="true" />
 
+  <!-- Should be a currency field, but this serves as a float field -->
+  <field name="salary" type="float" indexed="true" docValues="true" stored="true"/>
+
   <uniqueKey>id</uniqueKey>
 
   <!-- YZ String: Used for non-analyzed fields -->

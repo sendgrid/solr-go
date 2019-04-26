@@ -8,9 +8,10 @@ type SolrResponse struct {
 		Indent string `json:"indent"`
 		Wt     string `json:"wt"`
 	} `json:"params"`
-	Response       Response `json:"response"`
-	NextCursorMark string   `json:"nextCursorMark"`
-	Adds           Adds     `json:"adds"`
+	Response       Response               `json:"response"`
+	NextCursorMark string                 `json:"nextCursorMark"`
+	Adds           Adds                   `json:"adds"`
+	Facets         map[string]interface{} `json:"facets"`
 }
 
 type Response struct {
